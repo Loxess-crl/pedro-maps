@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "pedro-maps",
+    "name": "Pedro Maps",
     "slug": "pedro-maps",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,7 +16,14 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.cixdn.pedromaps",
+      "googleServicesFile": "./google-services.json",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDpfc6pLKJV6v3PraFAyx0LqH9uR_VWUMA"
+        }
+      }
     },
     "web": {
       "bundler": "metro",
@@ -33,7 +40,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

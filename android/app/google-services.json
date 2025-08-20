@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "627980096058",
+    "project_id": "pedromaps-49d45",
+    "storage_bucket": "pedromaps-49d45.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:627980096058:android:ac1a993a163d0a6d725b03",
+        "android_client_info": {
+          "package_name": "com.cixdn.pedromaps"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "627980096058-8pcgq74ivvbgihp2qcl3nbvoovj538c3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cixdn.pedromaps",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "627980096058-iq0s4s5to2bkvfec595at1nruvd119nu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cixdn.pedromaps",
+            "certificate_hash": "e31ba77f1a1b3b11a3e312eb61997a1fae5a8208"
+          }
+        },
+        {
+          "client_id": "627980096058-vsr0h68m4d15l581bj18s6i9inq3j5j7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpfc6pLKJV6v3PraFAyx0LqH9uR_VWUMA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "627980096058-vsr0h68m4d15l581bj18s6i9inq3j5j7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
