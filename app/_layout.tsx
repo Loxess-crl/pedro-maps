@@ -60,7 +60,7 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="index" />
           <Stack.Screen name="(auth)/login" />
-          <Stack.Screen name="(main)/home" />
+          <Stack.Screen name="(main)" />
         </Stack>
         <PortalHost />
       </ThemeProvider>
