@@ -22,6 +22,15 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="map/index"
+        options={{
+          title: "Mapa",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome size={28} name="map" color={color} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

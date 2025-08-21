@@ -1,5 +1,6 @@
 import "@/global.css";
 
+import { ErrorHandler } from "@/components/ErrorHandler";
 import { AuthProvider } from "@/context/authContext";
 import { setAndroidNavigationBar } from "@/lib/android-navigation-bar";
 import { NAV_THEME } from "@/lib/constants";
@@ -63,6 +64,7 @@ export default function RootLayout() {
           <Stack.Screen name="(main)" />
         </Stack>
         <PortalHost />
+        <ErrorHandler />
       </ThemeProvider>
     </AuthProvider>
   );

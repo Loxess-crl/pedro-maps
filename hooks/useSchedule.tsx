@@ -24,7 +24,6 @@ export const useSchedule = (params: Params) => {
         ...params,
       });
       const formattedData = convertDatesInObject(result.data);
-      console.log("SCHEDULES", formattedData);
 
       setData(formattedData as Schedule[]);
     } catch (err: any) {
