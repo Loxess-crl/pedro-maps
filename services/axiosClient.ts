@@ -7,7 +7,7 @@ export function setErrorHandler(callback: () => void) {
   showErrorCallback = callback;
 }
 
-const baseURL = "https://b046201a5f2d.ngrok-free.app/api";
+const baseURL = "https://93262e4d6cfc.ngrok-free.app/api";
 const axiosClient = axios.create({
   baseURL,
   headers: {
@@ -18,7 +18,6 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use(async (config) => {
   const token = await SecureStoreService.getToken();
-  console.log("TOKEN", token);
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
