@@ -1,7 +1,7 @@
 import { Schedule } from "@/interfaces/schedule.interface";
 import { getSchedules } from "@/services/scheduleService";
 import { convertDatesInObject } from "@/utils/functions";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface Params {
   start_date: string;
@@ -43,3 +43,17 @@ export const useSchedule = (params: Params) => {
 
   return { data, isLoading, error, refresh };
 };
+
+export function useTodaySchedule(selectedDate?: Date) {
+  const formatDate = (d: Date) => d.toISOString().split("T")[0];
+
+  const params = useMemo(() => {
+    const today = selectedDate ?? new Date();
+    const day = formatDate(today);
+    return { start_date: day, end_date: day };
+  }, [selectedDate]);
+
+  const { data, isLoading, error, refresh } = useSchedule(params);
+
+  return { schedules: data, isLoading, error, refresh };
+}

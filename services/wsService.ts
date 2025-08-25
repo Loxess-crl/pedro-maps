@@ -1,139 +1,173 @@
-// services/wsService.ts
+import {
+  BROADCAST_HOST,
+  BROADCAST_KEY,
+  BROADCAST_PORT,
+  BROADCAST_SECURE,
+} from "@/config/config";
 import { ApiRoutes } from "@/constants/apiRoutes";
 import axiosClient from "@/services/axiosClient";
+
+export type LocationPayload = {
+  location: { latitude: number; longitude: number };
+  user: { id: number; name: string };
+  additional: {
+    bus_id: number | string;
+    status?: string;
+    route_id?: number | string;
+  };
+};
 
 let ws: WebSocket | null = null;
 let heartbeatInterval: number | null = null;
 
-/**
- * Conectar a Laravel WebSockets self-hosted y suscribirse a canal privado
- */
-export const connectToChannel = async (
+const buildWSUrl = () => {
+  const protocol = BROADCAST_SECURE ? "wss" : "ws";
+  const host = BROADCAST_HOST;
+  const port = BROADCAST_PORT;
+  const appKey = BROADCAST_KEY;
+  // Protocolo Pusher-compatible que usa laravel-websockets
+  return `${protocol}://${host}:${port}/app/${appKey}?protocol=7&client=js&version=8.4.0-rc2&flash=false`;
+};
+
+type OnLocationFn = (payload: LocationPayload) => void;
+
+export async function connectToPrivateChannel(
   channelName: string,
-  eventName: string,
-  callback: (data: any) => void
-) => {
+  onLocation: OnLocationFn
+) {
   if (ws) {
-    console.log("⚠️ Ya existe WebSocket, desconectando...");
-    ws.close();
+    try {
+      ws.close();
+    } catch {}
     ws = null;
   }
 
-  // URL de conexión básica (sin auth todavía)
-  const protocol =
-    process.env.EXPO_PUBLIC_BROADCAST_SECURE === "true" ? "wss" : "ws";
-  const host = process.env.EXPO_PUBLIC_BROADCAST_HOST!;
-  const port = process.env.EXPO_PUBLIC_BROADCAST_PORT!;
-  const appKey = process.env.EXPO_PUBLIC_BROADCAST_KEY!;
-  const url = `${protocol}://${host}:${port}/app/${appKey}?protocol=7&client=js&version=8.4.0-rc2&flash=false`;
-
-  console.log("🌐 Conectando WebSocket a:", url);
+  const url = buildWSUrl();
+  console.log("🌐 WS →", url);
   ws = new WebSocket(url);
 
-  let socketId: string | null = null;
-  console.log("🌐 Conectando WebSocket a:", url);
-  console.log("socketId:", socketId);
-
   ws.onopen = () => {
-    console.log("✅ WebSocket conectado");
-
-    // Heartbeat cada 25s
+    console.log("✅ WS conectado");
     heartbeatInterval = setInterval(() => {
       if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ event: "pusher:ping" }));
+        ws.send(JSON.stringify({ event: "pusher:ping", data: {} }));
       }
     }, 25000);
   };
 
   ws.onmessage = async (message) => {
+    let data: any;
     try {
-      const data = JSON.parse(message.data);
+      data = JSON.parse(message.data);
+    } catch {
+      return;
+    }
+    // Log global de todo
+    console.log("📬", data.event, data.data ?? "");
 
-      // Log completo de todo lo que llega
-      console.log(
-        "📬 Mensaje WebSocket recibido:",
-        JSON.stringify(data, null, 2)
-      );
-
-      // Primer mensaje: connection_established → obtengo socket_id
-      if (data.event === "pusher:connection_established") {
+    // 1) socket_id
+    if (data.event === "pusher:connection_established") {
+      try {
         const payload = JSON.parse(data.data);
         const socketId = payload.socket_id;
-        console.log("🔑 Socket ID recibido:", socketId);
+        console.log("🔑 socket_id:", socketId);
 
-        // Hacer auth del canal privado
+        // 2) auth
+        const { data: authData } = await axiosClient.post(
+          ApiRoutes.BROADCAST_AUTH,
+          {
+            socket_id: socketId,
+            channel_name: channelName,
+          }
+        );
+        console.log("✅ auth OK");
+
+        // 3) subscribe
+        ws?.send(
+          JSON.stringify({
+            event: "pusher:subscribe",
+            data: { channel: channelName, auth: authData.auth },
+          })
+        );
+        console.log("📡 subscribe enviado:", channelName);
+      } catch (e: any) {
+        console.error(
+          "❌ auth/subscribe:",
+          e?.response?.data || e?.message || e
+        );
+      }
+      return;
+    }
+
+    if (data.event === "pusher_internal:subscription_succeeded") {
+      console.log("✅ suscripción confirmada");
+      return;
+    }
+
+    if (data.event === "pusher:error") {
+      console.log("⚠️ pusher:error", data?.data || data);
+      return;
+    }
+
+    // Detectar payload de ubicación, venga como objeto o string
+    const looksLikeLocation =
+      (typeof data?.data === "object" &&
+        data?.data?.location &&
+        data?.data?.additional) ||
+      (typeof data?.data === "string" &&
+        data?.data.includes('"location"') &&
+        data?.data.includes('"additional"'));
+
+    if (looksLikeLocation) {
+      let payload = data.data;
+      if (typeof payload === "string") {
         try {
-          const { data: authData } = await axiosClient.post(
-            ApiRoutes.BROADCAST_AUTH,
-            {
-              socket_id: socketId,
-              channel_name: channelName,
-            }
-          );
-          console.log("✅ Auth recibido:", authData);
-
-          // Suscribirse al canal privado
-          ws?.send(
-            JSON.stringify({
-              event: "pusher:subscribe",
-              data: {
-                channel: channelName,
-                auth: authData.auth,
-              },
-            })
-          );
-          console.log(`📡 Subscrito a canal: ${channelName}`);
-        } catch (err) {
-          console.error("❌ Error en authorizer:", err);
-        }
+          payload = JSON.parse(payload);
+        } catch {}
       }
+      onLocation(payload as LocationPayload);
+      return;
+    }
 
-      // Eventos de tu canal privado
-      if (data.event === eventName) {
-        console.log("📨 Evento de ubicación recibido:", data.data);
-        callback(data.data);
+    // Por nombre de evento
+    if (
+      data.event === "NewLocationReceived" ||
+      data.event?.toLowerCase?.().includes("location")
+    ) {
+      let payload = data.data;
+      if (typeof payload === "string") {
+        try {
+          payload = JSON.parse(payload);
+        } catch {}
       }
-
-      // Otros eventos internos (pusher:ping, pusher:pong, pusher:error, etc.)
-      if (
-        ![
-          "pusher:connection_established",
-          "pusher:ping",
-          "pusher:pong",
-          eventName,
-        ].includes(data.event)
-      ) {
-        console.log("ℹ️ Otro evento interno recibido:", data.event, data.data);
-      }
-    } catch (err) {
-      console.error("❌ Error parseando mensaje WebSocket:", err);
+      onLocation(payload as LocationPayload);
     }
   };
 
   ws.onerror = (err) => {
-    console.error("❌ WebSocket error:", err);
+    console.error("❌ WS error:", err);
   };
 
-  ws.onclose = () => {
-    console.log("⛔ WebSocket desconectado");
+  ws.onclose = (e) => {
+    console.log("⛔ WS cerrado:", e?.code, e?.reason);
     if (heartbeatInterval) {
       clearInterval(heartbeatInterval);
       heartbeatInterval = null;
     }
   };
-};
 
-/**
- * Desconectar WebSocket
- */
-export const disconnectWS = () => {
+  return ws;
+}
+
+export function disconnectWS() {
   if (ws) {
-    console.log("⏹ Cerrando WebSocket...");
-    ws.close();
+    try {
+      ws.close();
+    } catch {}
     ws = null;
   }
   if (heartbeatInterval) {
     clearInterval(heartbeatInterval);
     heartbeatInterval = null;
   }
-};
+}
