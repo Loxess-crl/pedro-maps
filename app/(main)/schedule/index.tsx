@@ -1,10 +1,9 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSchedule } from "@/hooks/useSchedule";
 import { Schedule } from "@/interfaces/schedule.interface";
-import { FontAwesome } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import {
   addWeeks,
   endOfWeek,
@@ -14,16 +13,19 @@ import {
   subWeeks,
 } from "date-fns";
 import { es } from "date-fns/locale";
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useMemo, useState } from "react";
 import {
-  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
+  StatusBar,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const WEEKDAYS = [
   "Domingo",
@@ -40,6 +42,144 @@ const WEEKDAYS_SHORT = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 interface GroupedSchedules {
   [key: number]: Schedule[];
 }
+
+const ScheduleCard: React.FC<{ schedule: Schedule; index: number }> = ({
+  schedule,
+  index,
+}) => {
+  return (
+    <Animated.View
+      entering={FadeInDown.delay(index * 50)}
+      className="mb-4"
+      style={{ transform: [{ scale: 0.98 }], opacity: 0.95 }}
+    >
+      <Card className="bg-white border-0 shadow-lg rounded-2xl overflow-hidden">
+        <View className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#2873b4] to-[#7bd2e6]" />
+
+        <CardHeader className="p-4 pb-3">
+          <View className="flex-row items-start justify-between">
+            <View className="flex-1 pr-3">
+              <View className="flex-row items-center mb-2">
+                <View className="w-2 h-2 rounded-full bg-[#ffc300] mr-2" />
+                <Text className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                  {schedule.route.name}
+                </Text>
+              </View>
+              <Text className="text-slate-900 text-lg font-bold leading-tight">
+                {schedule.t_start.slice(0, 5)} - {schedule.t_end.slice(0, 5)}
+              </Text>
+            </View>
+            <View className="bg-primary/10 rounded-xl p-3">
+              <Ionicons name="time-outline" size={24} color="#2873b4" />
+            </View>
+          </View>
+        </CardHeader>
+
+        <CardContent className="px-4 pb-4">
+          <View className="bg-slate-50 rounded-xl p-3">
+            <View className="flex-row items-center">
+              <Ionicons
+                name="person-circle-outline"
+                size={28}
+                color="#2873b4"
+                className="mr-2"
+              />
+              <View>
+                <Text className="text-slate-700 text-sm font-medium">
+                  {schedule.driver.name} {schedule.driver.ln_pat}
+                </Text>
+                <Text className="text-slate-500 text-xs">Conductor</Text>
+              </View>
+            </View>
+          </View>
+        </CardContent>
+      </Card>
+    </Animated.View>
+  );
+};
+
+const LoadingState: React.FC = () => (
+  <View className="px-5 py-4">
+    {Array.from({ length: 3 }).map((_, index) => (
+      <Card
+        key={index}
+        className="bg-white border-0 shadow-lg rounded-2xl mb-4 overflow-hidden"
+      >
+        <View className="absolute top-0 left-0 right-0 h-1 bg-slate-200" />
+        <CardHeader className="p-4 pb-3">
+          <View className="flex-row items-start justify-between">
+            <View className="flex-1 pr-3">
+              <Skeleton className="h-3 w-1/2 bg-slate-200 rounded-full mb-3" />
+              <Skeleton className="h-6 w-3/4 bg-slate-200 rounded-lg" />
+            </View>
+            <Skeleton className="w-12 h-12 bg-slate-200 rounded-xl" />
+          </View>
+        </CardHeader>
+        <CardContent className="px-4 pb-4">
+          <Skeleton className="h-12 bg-slate-200 rounded-xl" />
+        </CardContent>
+      </Card>
+    ))}
+  </View>
+);
+
+const EmptyState: React.FC<{ onRefresh: () => void }> = ({ onRefresh }) => (
+  <View className="flex-1 items-center justify-center px-8 py-16">
+    <View className="bg-gradient-to-br from-[#7bd2e6]/20 to-[#2873b4]/20 rounded-3xl p-8 mb-8">
+      <View className="bg-white rounded-2xl p-6 shadow-sm">
+        <Ionicons name="calendar-outline" size={64} color="#7bd2e6" />
+      </View>
+    </View>
+    <Text className="text-slate-900 text-2xl font-bold text-center mb-3">
+      Sin horarios programados
+    </Text>
+    <Text className="text-slate-600 text-base text-center leading-6 mb-8 max-w-xs opacity-80">
+      No hay horarios para la semana seleccionada. Prueba con otra semana o
+      actualiza.
+    </Text>
+    <TouchableOpacity
+      onPress={onRefresh}
+      className="bg-gradient-to-r from-[#2873b4] to-[#7bd2e6] rounded-2xl px-8 py-4 shadow-lg"
+      activeOpacity={0.8}
+    >
+      <View className="flex-row items-center">
+        <Ionicons name="refresh" size={20} color="white" />
+        <Text className="text-white font-semibold text-base ml-2">
+          Actualizar
+        </Text>
+      </View>
+    </TouchableOpacity>
+  </View>
+);
+
+const ErrorState: React.FC<{ onRefresh: () => void }> = ({ onRefresh }) => (
+  <View className="flex-1 items-center justify-center px-8 py-16">
+    <View className="bg-red-50 rounded-3xl p-8 mb-8">
+      <View className="bg-white rounded-2xl p-6 shadow-sm">
+        <MaterialIcons name="error-outline" size={64} color="#ef4444" />
+      </View>
+    </View>
+    <Text className="text-slate-900 text-2xl font-bold text-center mb-3">
+      Ups, algo salió mal
+    </Text>
+    <Text className="text-slate-600 text-base text-center leading-6 mb-8 max-w-xs opacity-80">
+      No pudimos cargar los horarios. Verifica tu conexión y vuelve a
+      intentarlo.
+    </Text>
+    <TouchableOpacity
+      onPress={onRefresh}
+      className="border-2 border-red-200 bg-red-50 rounded-2xl px-8 py-4"
+      activeOpacity={0.8}
+    >
+      <View className="flex-row items-center">
+        <Ionicons name="refresh" size={20} color="#ef4444" />
+        <Text className="text-red-600 font-semibold text-base ml-2">
+          Reintentar
+        </Text>
+      </View>
+    </TouchableOpacity>
+  </View>
+);
 
 export default function WeeklyScheduleScreen() {
   const [selectedWeek, setSelectedWeek] = useState(new Date());
@@ -58,42 +198,20 @@ export default function WeeklyScheduleScreen() {
 
   const { data: schedules, isLoading, error, refresh } = useSchedule(params);
 
-  // Agrupar horarios por día de la semana con mejor lógica
   const groupedSchedules = useMemo(() => {
     if (!schedules) return {};
-
     const grouped: GroupedSchedules = {};
-
     schedules.forEach((schedule) => {
       const dayKey = schedule.sh_weekday;
-      if (!grouped[dayKey]) {
-        grouped[dayKey] = [];
-      }
+      if (!grouped[dayKey]) grouped[dayKey] = [];
       grouped[dayKey].push(schedule);
     });
-
-    // Ordenar horarios por hora de inicio
     Object.keys(grouped).forEach((day) => {
       grouped[Number(day)].sort((a, b) => a.t_start.localeCompare(b.t_start));
     });
-
     return grouped;
   }, [schedules]);
 
-  // Estadísticas de la semana
-  const weekStats = useMemo(() => {
-    const totalSchedules = schedules?.length || 0;
-    const daysWithSchedules = Object.keys(groupedSchedules).length;
-    const routesCount = new Set(schedules?.map((s) => s.route.id) || []).size;
-
-    return {
-      total: totalSchedules,
-      days: daysWithSchedules,
-      routes: routesCount,
-    };
-  }, [schedules, groupedSchedules]);
-
-  // Navegación de semanas con animación
   const handlePreviousWeek = useCallback(() => {
     setSelectedWeek((prev) => subWeeks(prev, 1));
     setSelectedDay(null);
@@ -107,99 +225,20 @@ export default function WeeklyScheduleScreen() {
   const formatWeekRange = useCallback(() => {
     const start = startOfWeek(selectedWeek, { weekStartsOn: 1 });
     const end = endOfWeek(selectedWeek, { weekStartsOn: 1 });
-
     if (start.getMonth() === end.getMonth()) {
-      return `${format(start, "d", { locale: es })} - ${format(end, "d 'de' MMMM yyyy", { locale: es })}`;
+      return `${format(start, "d")} - ${format(end, "d 'de' MMMM", { locale: es })}`;
     }
-
     return `${format(start, "d MMM", { locale: es })} - ${format(end, "d MMM yyyy", { locale: es })}`;
   }, [selectedWeek]);
 
-  const getScheduleStatus = (schedule: Schedule) => {
-    // Aquí puedes agregar lógica para determinar el estado del horario
-    // Por ejemplo, si ya pasó, está activo, etc.
-    return "scheduled"; // pending, active, completed, cancelled
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-green-100 text-green-800";
-      case "completed":
-        return "bg-gray-100 text-gray-600";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-blue-100 text-blue-800";
-    }
-  };
-
-  const renderScheduleItem = useCallback(
-    (schedule: Schedule, index: number) => {
-      const status = getScheduleStatus(schedule);
-
-      return (
-        <Animated.View
-          key={schedule.id}
-          entering={FadeInDown.delay(index * 50)}
-        >
-          <Card className="mb-3 bg-white border border-gray-100 shadow-sm">
-            <CardContent className="p-4">
-              <View className="flex-row items-start justify-between">
-                <View className="flex-1 mr-3">
-                  <View className="flex-row items-center mb-2">
-                    <Text className="text-base font-semibold text-gray-900 mr-2">
-                      {schedule.t_start} - {schedule.t_end}
-                    </Text>
-                    <Badge className={`${getStatusColor(status)} px-2 py-1`}>
-                      <Text className="text-xs font-medium">Programado</Text>
-                    </Badge>
-                  </View>
-
-                  <View className="flex-row items-center mb-1">
-                    <FontAwesome name="map-marker" size={14} color="#6B7280" />
-                    <Text className="text-sm text-gray-600 ml-2 font-medium">
-                      {schedule.route.name}
-                    </Text>
-                  </View>
-
-                  <View className="flex-row items-center">
-                    <FontAwesome name="user" size={14} color="#6B7280" />
-                    <Text className="text-sm text-gray-500 ml-2">
-                      {schedule.driver.name} {schedule.driver.ln_pat}
-                    </Text>
-                  </View>
-                </View>
-
-                <Pressable
-                  className="bg-blue-50 rounded-full w-8 h-8 items-center justify-center active:bg-blue-100"
-                  onPress={() => {
-                    Alert.alert(
-                      "Detalles del Horario",
-                      `Ruta: ${schedule.route.name}\nConductor: ${schedule.driver.name} ${schedule.driver.ln_pat}\nHorario: ${schedule.t_start} - ${schedule.t_end}`
-                    );
-                  }}
-                >
-                  <FontAwesome name="info" size={14} color="#3B82F6" />
-                </Pressable>
-              </View>
-            </CardContent>
-          </Card>
-        </Animated.View>
-      );
-    },
-    []
-  );
-
   const renderWeekOverview = () => {
     const start = startOfWeek(selectedWeek, { weekStartsOn: 1 });
-
     return (
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         className="mb-6"
-        contentContainerStyle={{ paddingHorizontal: 16 }}
+        contentContainerStyle={{ paddingHorizontal: 20 }}
       >
         {[1, 2, 3, 4, 5, 6, 0].map((dayNum) => {
           const dayDate = new Date(start);
@@ -212,36 +251,30 @@ export default function WeeklyScheduleScreen() {
             <Pressable
               key={dayNum}
               onPress={() => setSelectedDay(isSelectedDay ? null : dayNum)}
-              className={`mr-3 p-3 rounded-xl min-w-[70px] items-center ${
+              className={`mr-3 p-3 rounded-2xl min-w-[64px] items-center border-2 transition-all duration-300 ${
                 isSelectedDay
-                  ? "bg-blue-500"
-                  : hasSchedules
-                    ? "bg-white border-2 border-blue-200"
-                    : "bg-gray-50"
-              } ${isTodayDay ? "ring-2 ring-orange-300" : ""}`}
+                  ? "bg-[#2873b4] border-[#2873b4]"
+                  : "bg-white border-slate-200"
+              } ${isTodayDay && !isSelectedDay ? "border-[#ffc300]" : ""}`}
             >
               <Text
-                className={`text-xs font-medium mb-1 ${
-                  isSelectedDay ? "text-white" : "text-gray-600"
+                className={`text-xs font-semibold mb-1 ${
+                  isSelectedDay ? "text-white/80" : "text-slate-500"
                 }`}
               >
                 {WEEKDAYS_SHORT[dayNum]}
               </Text>
               <Text
-                className={`text-lg font-bold ${
-                  isSelectedDay
-                    ? "text-white"
-                    : isTodayDay
-                      ? "text-orange-600"
-                      : "text-gray-900"
+                className={`text-xl font-bold ${
+                  isSelectedDay ? "text-white" : "text-slate-800"
                 }`}
               >
                 {format(dayDate, "d")}
               </Text>
               {hasSchedules && (
                 <View
-                  className={`mt-1 w-2 h-2 rounded-full ${
-                    isSelectedDay ? "bg-white" : "bg-blue-500"
+                  className={`mt-1.5 w-1.5 h-1.5 rounded-full ${
+                    isSelectedDay ? "bg-white" : "bg-[#2873b4]"
                   }`}
                 />
               )}
@@ -256,214 +289,140 @@ export default function WeeklyScheduleScreen() {
     (dayNumber: number) => {
       const daySchedules = groupedSchedules[dayNumber];
       if (!daySchedules || daySchedules.length === 0) return null;
-
       if (selectedDay && selectedDay !== dayNumber) return null;
 
       return (
-        <Animated.View key={dayNumber} className="mb-6" entering={FadeInUp}>
-          <View className="flex-row items-center justify-between mb-4 px-1">
+        <Animated.View
+          key={dayNumber}
+          className="mb-6 px-5"
+          entering={FadeInUp}
+        >
+          <View className="flex-row items-center justify-between mb-4">
             <View className="flex-row items-center">
-              <Text className="text-xl font-bold text-gray-900 mr-2">
+              <Text className="text-slate-900 text-xl font-bold mr-2">
                 {WEEKDAYS[dayNumber]}
               </Text>
-              <Badge className="bg-blue-100 text-blue-800 px-2 py-1">
-                <Text className="text-xs font-medium">
+              <Badge className="bg-primary/10 text-primary px-2 py-1 rounded-full">
+                <Text className="text-xs font-semibold text-[#2873b4]">
                   {daySchedules.length} horario
                   {daySchedules.length !== 1 ? "s" : ""}
                 </Text>
               </Badge>
             </View>
           </View>
-          {daySchedules.map((schedule, index) =>
-            renderScheduleItem(schedule, index)
-          )}
+          {daySchedules.map((schedule, index) => (
+            <ScheduleCard key={schedule.id} schedule={schedule} index={index} />
+          ))}
         </Animated.View>
       );
     },
-    [selectedDay, groupedSchedules, renderScheduleItem]
+    [selectedDay, groupedSchedules]
   );
 
-  const renderSkeletonLoading = () => (
-    <ScrollView className="flex-1 p-4">
-      {[1, 2, 3].map((i) => (
-        <View key={i} className="mb-6">
-          <Skeleton className="h-6 w-24 mb-3 bg-gray-200" />
-          {[1, 2].map((j) => (
-            <Card key={j} className="mb-3 bg-white">
-              <CardContent className="p-4">
-                <Skeleton className="h-4 w-32 mb-2 bg-gray-200" />
-                <Skeleton className="h-3 w-48 mb-1 bg-gray-200" />
-                <Skeleton className="h-3 w-40 bg-gray-200" />
-              </CardContent>
-            </Card>
-          ))}
+  const MainContent = () => {
+    if (isLoading) return <LoadingState />;
+    if (error) return <ErrorState onRefresh={refresh} />;
+    if (!schedules || schedules.length === 0) {
+      return <EmptyState onRefresh={refresh} />;
+    }
+
+    const content = selectedDay
+      ? renderDaySection(selectedDay)
+      : [1, 2, 3, 4, 5, 6, 0].map(renderDaySection);
+
+    const hasContent = Array.isArray(content)
+      ? content.some((c) => c !== null)
+      : content !== null;
+
+    if (!hasContent && selectedDay) {
+      return (
+        <View className="items-center justify-center py-16 px-5">
+          <View className="bg-primary/10 rounded-full p-5 mb-5">
+            <Ionicons name="sad-outline" size={40} color="#2873b4" />
+          </View>
+          <Text className="text-slate-900 text-xl font-bold text-center mb-2">
+            Sin horarios para este día
+          </Text>
+          <Text className="text-slate-600 text-base text-center leading-6 max-w-xs opacity-80">
+            No hay actividades programadas para el {WEEKDAYS[selectedDay]}.
+          </Text>
         </View>
-      ))}
-    </ScrollView>
-  );
+      );
+    }
 
-  const renderEmptyState = () => (
-    <Animated.View
-      entering={FadeInUp}
-      className="flex-1 justify-center items-center px-6"
-    >
-      <View className="bg-blue-50 rounded-full w-20 h-20 justify-center items-center mb-6">
-        <FontAwesome name="calendar-o" size={32} color="#3B82F6" />
-      </View>
-      <Text className="text-xl font-semibold text-gray-900 mb-2 text-center">
-        Sin horarios programados
-      </Text>
-      <Text className="text-base text-gray-500 text-center mb-6 leading-6">
-        No hay horarios para la semana seleccionada.{"\n"}
-        Intenta con otra semana o actualiza la información.
-      </Text>
-      <Button
-        onPress={refresh}
-        className="flex-row items-center gap-2 bg-blue-500"
-        size="lg"
-      >
-        <FontAwesome name="refresh" size={16} color="white" />
-        <Text className="text-white font-medium">Actualizar</Text>
-      </Button>
-    </Animated.View>
-  );
-
-  const renderErrorState = () => (
-    <Animated.View
-      entering={FadeInUp}
-      className="flex-1 justify-center items-center px-6"
-    >
-      <View className="bg-red-50 rounded-full w-20 h-20 justify-center items-center mb-6">
-        <FontAwesome name="exclamation-triangle" size={32} color="#EF4444" />
-      </View>
-      <Text className="text-xl font-semibold text-gray-900 mb-2 text-center">
-        Error al cargar
-      </Text>
-      <Text className="text-base text-gray-500 text-center mb-6 leading-6">
-        No se pudieron cargar los horarios.{"\n"}
-        Verifica tu conexión e intenta nuevamente.
-      </Text>
-      <Button onPress={refresh} className="bg-red-500" size="lg">
-        <FontAwesome name="refresh" size={16} color="white" />
-        <Text className="text-white font-medium ml-2">Reintentar</Text>
-      </Button>
-    </Animated.View>
-  );
+    return <>{content}</>;
+  };
 
   return (
-    <View className="flex-1 bg-gray-50">
-      {/* Header mejorado */}
-      <View className="bg-white border-b border-gray-100 shadow-sm">
-        <View className="pt-12 pb-6 px-4">
-          <Text className="text-3xl font-bold text-gray-900 mb-2 text-center">
-            Horarios
-          </Text>
+    <View className="flex-1 bg-slate-50">
+      <StatusBar barStyle="light-content" backgroundColor="#2873b4" />
 
-          {/* Estadísticas rápidas */}
-          {!isLoading && !error && schedules && (
-            <View className="flex-row justify-center items-center mb-4 space-x-6">
-              <View className="items-center">
-                <Text className="text-2xl font-bold text-blue-600">
-                  {weekStats.total}
-                </Text>
-                <Text className="text-xs text-gray-500 font-medium">Total</Text>
-              </View>
-              <View className="items-center">
-                <Text className="text-2xl font-bold text-green-600">
-                  {weekStats.days}
-                </Text>
-                <Text className="text-xs text-gray-500 font-medium">Días</Text>
-              </View>
-              <View className="items-center">
-                <Text className="text-2xl font-bold text-purple-600">
-                  {weekStats.routes}
-                </Text>
-                <Text className="text-xs text-gray-500 font-medium">Rutas</Text>
-              </View>
+      <LinearGradient
+        colors={["#2873b4", "#7bd2e6"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="pt-12 pb-8 px-5"
+      >
+        <SafeAreaView>
+          <View className="flex-row items-center justify-between mb-6">
+            <View className="flex-1">
+              <Text className="text-white text-3xl font-bold mb-1">
+                Horario Semanal
+              </Text>
+              <Text className="text-white/80 text-base">
+                Consulta la programación de rutas
+              </Text>
             </View>
-          )}
+            <View className="bg-white/20 rounded-2xl p-3">
+              <MaterialIcons name="schedule" size={32} color="white" />
+            </View>
+          </View>
 
-          {/* Navegación de semanas */}
-          <View className="flex-row items-center justify-between mb-4">
-            <Button
-              size="icon"
+          <View className="flex-row items-center justify-between">
+            <TouchableOpacity
               onPress={handlePreviousWeek}
-              variant="outline"
-              className="rounded-full border-gray-200"
+              className="bg-white/20 rounded-full p-2 active:bg-white/30"
             >
-              <FontAwesome name="chevron-left" size={16} color="#6B7280" />
-            </Button>
+              <Ionicons name="chevron-back" size={22} color="white" />
+            </TouchableOpacity>
 
             <Pressable
               onPress={() => setSelectedWeek(new Date())}
-              className="px-4 py-2 bg-gray-50 rounded-lg"
+              className="px-4 py-2"
             >
-              <Text className="text-lg font-semibold text-gray-800 text-center">
+              <Text className="text-white text-lg font-bold text-center">
                 {formatWeekRange()}
               </Text>
             </Pressable>
 
-            <Button
+            <TouchableOpacity
               onPress={handleNextWeek}
-              className="rounded-full border-gray-200"
-              variant="outline"
-              size="icon"
+              className="bg-white/20 rounded-full p-2 active:bg-white/30"
             >
-              <FontAwesome name="chevron-right" size={16} color="#6B7280" />
-            </Button>
+              <Ionicons name="chevron-forward" size={22} color="white" />
+            </TouchableOpacity>
           </View>
+        </SafeAreaView>
+      </LinearGradient>
+
+      <ScrollView
+        className="flex-1 -mt-4"
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={refresh}
+            colors={["#2873b4"]}
+            tintColor="#2873b4"
+            progressBackgroundColor="#ffffff"
+          />
+        }
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="bg-white rounded-t-3xl pt-6 min-h-screen">
+          {!isLoading && !error && schedules && renderWeekOverview()}
+          <MainContent />
         </View>
-
-        {/* Vista general de la semana */}
-        {!isLoading && !error && schedules && renderWeekOverview()}
-      </View>
-
-      {/* Contenido principal */}
-      {isLoading ? (
-        renderSkeletonLoading()
-      ) : error ? (
-        renderErrorState()
-      ) : !schedules || schedules.length === 0 ? (
-        renderEmptyState()
-      ) : (
-        <ScrollView
-          className="flex-1"
-          contentContainerStyle={{ padding: 16 }}
-          refreshControl={
-            <RefreshControl
-              refreshing={isLoading}
-              onRefresh={refresh}
-              colors={["#3B82F6"]}
-              tintColor="#3B82F6"
-            />
-          }
-          showsVerticalScrollIndicator={false}
-        >
-          {selectedDay ? (
-            renderDaySection(selectedDay)
-          ) : (
-            <>
-              {/* Filtro por días activo */}
-              {selectedDay && (
-                <View className="flex-row items-center mb-4">
-                  <Button
-                    onPress={() => setSelectedDay(null)}
-                    variant="outline"
-                    size="sm"
-                    className="flex-row items-center gap-2"
-                  >
-                    <FontAwesome name="times" size={12} />
-                    <Text>Ver todos los días</Text>
-                  </Button>
-                </View>
-              )}
-
-              {/* Renderizar días en orden */}
-              {[1, 2, 3, 4, 5, 6, 0].map(renderDaySection)}
-            </>
-          )}
-        </ScrollView>
-      )}
+      </ScrollView>
     </View>
   );
 }

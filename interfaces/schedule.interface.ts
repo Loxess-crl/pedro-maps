@@ -31,7 +31,14 @@ export interface Route {
   id: number;
   name: string;
   description: string;
-  points: any[];
+  points: Point[];
   created_at: Date;
   updated_at: Date;
+}
+
+export interface Point {
+  id: number;
+  latitude: string;
+  longitude: string;
+  route_id: number;
 }

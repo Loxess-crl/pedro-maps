@@ -1,58 +1,77 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRoutes } from "@/hooks/useRoutes";
 import { Route } from "@/interfaces/schedule.interface";
-import { FontAwesome } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
 import {
   RefreshControl,
   ScrollView,
+  StatusBar,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const RouteCard: React.FC<{ route: Route; onPress: () => void }> = ({
-  route,
-  onPress,
-}) => (
-  <TouchableOpacity onPress={onPress} className="mb-4">
-    <Card className="bg-white border-slate-200 shadow-sm">
-      <CardHeader className="pb-3">
+const RouteCard: React.FC<{
+  route: Route;
+  onPress: () => void;
+  index: number;
+}> = ({ route, onPress, index }) => (
+  <TouchableOpacity
+    onPress={onPress}
+    className="mb-4"
+    style={{
+      transform: [{ scale: 0.98 }],
+      opacity: 0.9,
+    }}
+    activeOpacity={0.8}
+  >
+    <Card className="bg-white border-0 shadow-lg rounded-2xl overflow-hidden">
+      <View className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#2873b4] to-[#7bd2e6]" />
+
+      <CardHeader className="p-5 pb-3">
         <View className="flex-row items-start justify-between">
-          <View className="flex-1 pr-3">
-            <CardTitle className="text-slate-900 text-lg font-semibold leading-6">
+          <View className="flex-1 pr-4">
+            <View className="flex-row items-center mb-2">
+              <View className="w-2 h-2 rounded-full bg-[#ffc300] mr-2" />
+              <Text className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                RUTA UNIVERSITARIA
+              </Text>
+            </View>
+            <Text className="text-slate-900 text-xl font-bold leading-6 mb-2">
               {route.name}
-            </CardTitle>
-            <CardDescription className="text-slate-600 text-sm mt-1 leading-5">
+            </Text>
+            <Text className="text-slate-600 text-sm leading-5 opacity-80">
               {route.description}
-            </CardDescription>
+            </Text>
           </View>
-          <View className="bg-primary/10 rounded-full p-2">
-            <FontAwesome name="map" size={20} className="text-primary" />
+          <View className="bg-primary rounded-2xl p-4 shadow-md">
+            <MaterialIcons name="route" size={28} color="white" />
           </View>
         </View>
       </CardHeader>
-      <CardContent className="pt-0">
-        <View className="flex-row items-center justify-between">
+
+      <CardContent className="px-5 pb-5">
+        <View className="flex-row items-center justify-between bg-slate-50 rounded-xl p-4">
           <View className="flex-row items-center">
-            <FontAwesome
-              name="map-pin"
-              size={16}
-              className="text-slate-500 mr-2"
-            />
-            <Text className="text-slate-600 text-sm">Ruta universitaria</Text>
+            <View className="bg-[#2873b4]/10 rounded-full p-2 mr-3">
+              <Ionicons name="location" size={18} color="#2873b4" />
+            </View>
+            <View>
+              <Text className="text-slate-700 text-sm font-medium">
+                Campus Principal
+              </Text>
+              <Text className="text-slate-500 text-xs">
+                Sistema de navegación
+              </Text>
+            </View>
           </View>
-          <View className="bg-primary rounded-full px-3 py-1">
-            <Text className="text-white text-xs font-medium">Ver ruta</Text>
+          <View className="bg-primary rounded-xl px-4 py-2 shadow-sm">
+            <Text className="text-white text-sm font-semibold">Ver Ruta</Text>
           </View>
         </View>
       </CardContent>
@@ -61,23 +80,27 @@ const RouteCard: React.FC<{ route: Route; onPress: () => void }> = ({
 );
 
 const LoadingState: React.FC = () => (
-  <View className="px-4 py-2">
-    {Array.from({ length: 4 }).map((_, index) => (
-      <Card key={index} className="bg-white border-slate-200 shadow-sm mb-4">
-        <CardHeader className="pb-3">
+  <View className="px-5 py-4">
+    {Array.from({ length: 3 }).map((_, index) => (
+      <Card
+        key={index}
+        className="bg-white border-0 shadow-lg rounded-2xl mb-4 overflow-hidden"
+      >
+        <View className="absolute top-0 left-0 right-0 h-1 bg-slate-200" />
+        <CardHeader className="p-5 pb-3">
           <View className="flex-row items-start justify-between">
-            <View className="flex-1 pr-3">
-              <Skeleton className="h-5 bg-slate-200 rounded mb-2 w-3/4" />
+            <View className="flex-1 pr-4">
+              <Skeleton className="h-3 bg-slate-200 rounded-full mb-3 w-1/3" />
+              <Skeleton className="h-6 bg-slate-200 rounded-lg mb-3 w-4/5" />
               <Skeleton className="h-4 bg-slate-200 rounded w-full" />
-              <Skeleton className="h-4 bg-slate-200 rounded w-5/6 mt-1" />
+              <Skeleton className="h-4 bg-slate-200 rounded w-3/4 mt-2" />
             </View>
-            <Skeleton className="h-12 w-12 bg-slate-200 rounded-full" />
+            <Skeleton className="h-16 w-16 bg-slate-200 rounded-2xl" />
           </View>
         </CardHeader>
-        <CardContent className="pt-0">
-          <View className="flex-row items-center justify-between">
-            <Skeleton className="h-4 bg-slate-200 rounded w-1/3" />
-            <Skeleton className="h-6 bg-slate-200 rounded-full w-20" />
+        <CardContent className="px-5 pb-5">
+          <View className="bg-slate-50 rounded-xl p-4">
+            <Skeleton className="h-12 bg-slate-200 rounded-xl w-full" />
           </View>
         </CardContent>
       </Card>
@@ -86,58 +109,82 @@ const LoadingState: React.FC = () => (
 );
 
 const EmptyState: React.FC<{ onRefresh: () => void }> = ({ onRefresh }) => (
-  <View className="flex-1 items-center justify-center px-6 py-12">
-    <View className="bg-slate-100 rounded-full p-6 mb-6">
-      <FontAwesome name="compass" size={48} className="text-slate-400" />
-    </View>
-    <Text className="text-slate-900 text-xl font-semibold text-center mb-2">
-      No hay rutas disponibles
-    </Text>
-    <Text className="text-slate-600 text-base text-center leading-6 mb-8 max-w-sm">
-      Actualmente no se han encontrado rutas universitarias. Intenta refrescar
-      para ver las rutas más recientes.
-    </Text>
-    <Button onPress={onRefresh} className="bg-primary">
-      <View className="flex-row items-center">
-        <FontAwesome name="refresh" size={16} className="text-white mr-2" />
-        <Text className="text-white font-medium">Refrescar rutas</Text>
+  <View className="flex-1 items-center justify-center px-8 py-16">
+    <View className="bg-gradient-to-br from-[#7bd2e6]/20 to-[#2873b4]/20 rounded-3xl p-8 mb-8">
+      <View className="bg-white rounded-2xl p-6 shadow-sm">
+        <MaterialIcons name="explore-off" size={64} color="#7bd2e6" />
       </View>
-    </Button>
+    </View>
+
+    <Text className="text-slate-900 text-2xl font-bold text-center mb-3">
+      ¡Aún no hay rutas!
+    </Text>
+    <Text className="text-slate-600 text-base text-center leading-6 mb-8 max-w-xs opacity-80">
+      Las rutas universitarias aparecerán aquí cuando estén disponibles.
+      Mantente conectado para las últimas actualizaciones.
+    </Text>
+
+    <TouchableOpacity
+      onPress={onRefresh}
+      className="bg-gradient-to-r from-[#2873b4] to-[#7bd2e6] rounded-2xl px-8 py-4 shadow-lg"
+      activeOpacity={0.8}
+    >
+      <View className="flex-row items-center">
+        <Ionicons name="refresh" size={20} color="white" />
+        <Text className="text-white font-semibold text-base ml-2">
+          Actualizar rutas
+        </Text>
+      </View>
+    </TouchableOpacity>
   </View>
 );
 
 const ErrorState: React.FC<{ onRefresh: () => void }> = ({ onRefresh }) => (
-  <View className="flex-1 items-center justify-center px-6 py-12">
-    <View className="bg-red-100 rounded-full p-6 mb-6">
-      <FontAwesome
-        name="exclamation-circle"
-        size={48}
-        className="text-red-500"
-      />
-    </View>
-    <Text className="text-slate-900 text-xl font-semibold text-center mb-2">
-      Error al cargar rutas
-    </Text>
-    <Text className="text-slate-600 text-base text-center leading-6 mb-8 max-w-sm">
-      Ha ocurrido un problema al cargar las rutas universitarias. Verifica tu
-      conexión e intenta nuevamente.
-    </Text>
-    <Button onPress={onRefresh} variant="outline" className="border-red-200">
-      <View className="flex-row items-center">
-        <FontAwesome name="refresh" size={16} className="text-red-600 mr-2" />
-        <Text className="text-red-600 font-medium">Intentar de nuevo</Text>
+  <View className="flex-1 items-center justify-center px-8 py-16">
+    <View className="bg-red-50 rounded-3xl p-8 mb-8">
+      <View className="bg-white rounded-2xl p-6 shadow-sm">
+        <MaterialIcons name="error-outline" size={64} color="#ef4444" />
       </View>
-    </Button>
+    </View>
+
+    <Text className="text-slate-900 text-2xl font-bold text-center mb-3">
+      Ups, algo salió mal
+    </Text>
+    <Text className="text-slate-600 text-base text-center leading-6 mb-8 max-w-xs opacity-80">
+      No pudimos cargar las rutas universitarias. Verifica tu conexión y vuelve
+      a intentarlo.
+    </Text>
+
+    <TouchableOpacity
+      onPress={onRefresh}
+      className="border-2 border-red-200 bg-red-50 rounded-2xl px-8 py-4"
+      activeOpacity={0.8}
+    >
+      <View className="flex-row items-center">
+        <Ionicons name="refresh" size={20} color="#ef4444" />
+        <Text className="text-red-600 font-semibold text-base ml-2">
+          Reintentar
+        </Text>
+      </View>
+    </TouchableOpacity>
   </View>
 );
 
 const RoutesScreen: React.FC = () => {
-  const params = useMemo(() => ({ perPage: 100 }), []);
+  const params = useMemo(() => ({ perPage: 100, search: "Chiclayo" }), []);
   const { data: routes, isLoading, error, refresh } = useRoutes(params);
+  const router = useRouter();
 
   const handleRoutePress = (route: Route) => {
-    // Aquí navegarías a la pantalla de detalle de la ruta
-    console.log("Navegar a ruta:", route.name);
+    router.push({
+      pathname: "/(main)/routes/[id]",
+      params: {
+        id: String(route.id),
+        name: route.name,
+        description: route.description,
+        points: JSON.stringify(route.points),
+      },
+    });
   };
 
   const handleRefresh = () => {
@@ -146,132 +193,208 @@ const RoutesScreen: React.FC = () => {
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-slate-50">
-        <View className="px-4 py-6 border-b border-slate-200 bg-white">
-          <View className="flex-row items-center">
-            <View className="bg-primary/10 rounded-full p-2 mr-3">
-              <FontAwesome name="book" size={24} className="text-primary" />
+      <View className="flex-1 bg-slate-50">
+        <StatusBar barStyle="light-content" backgroundColor="#2873b4" />
+        <LinearGradient
+          colors={["#2873b4", "#7bd2e6"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="pt-12 pb-8 px-5"
+        >
+          <SafeAreaView>
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1">
+                <Text className="text-white text-3xl font-bold mb-1">
+                  Rutas Campus
+                </Text>
+                <Text className="text-white/80 text-base">
+                  Sistema de navegación universitaria
+                </Text>
+              </View>
+              <View className="bg-white/20 rounded-2xl p-3">
+                <MaterialIcons name="school" size={32} color="white" />
+              </View>
             </View>
-            <View>
-              <Text className="text-slate-900 text-2xl font-bold">Rutas</Text>
-              <Text className="text-slate-600 text-sm">
-                Sistema de navegación universitaria
-              </Text>
-            </View>
+          </SafeAreaView>
+        </LinearGradient>
+        <ScrollView className="flex-1 -mt-4">
+          <View className="bg-white rounded-t-3xl pt-6 min-h-full">
+            <LoadingState />
           </View>
-        </View>
-        <ScrollView className="flex-1">
-          <LoadingState />
         </ScrollView>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView className="flex-1 bg-slate-50">
-        <View className="px-4 py-6 border-b border-slate-200 bg-white">
-          <View className="flex-row items-center">
-            <View className="bg-primary/10 rounded-full p-2 mr-3">
-              <FontAwesome
-                name="bookmark-o"
-                size={24}
-                className="text-primary"
-              />
+      <View className="flex-1 bg-slate-50">
+        <StatusBar barStyle="light-content" backgroundColor="#2873b4" />
+        <LinearGradient
+          colors={["#2873b4", "#7bd2e6"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="pt-12 pb-8 px-5"
+        >
+          <SafeAreaView>
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1">
+                <Text className="text-white text-3xl font-bold mb-1">
+                  Rutas Campus
+                </Text>
+                <Text className="text-white/80 text-base">
+                  Sistema de navegación universitaria
+                </Text>
+              </View>
+              <View className="bg-white/20 rounded-2xl p-3">
+                <MaterialIcons name="school" size={32} color="white" />
+              </View>
             </View>
-            <View>
-              <Text className="text-slate-900 text-2xl font-bold">Rutas</Text>
-              <Text className="text-slate-600 text-sm">
-                Sistema de navegación universitaria
-              </Text>
-            </View>
-          </View>
+          </SafeAreaView>
+        </LinearGradient>
+        <View className="flex-1 bg-white rounded-t-3xl -mt-4">
+          <ErrorState onRefresh={handleRefresh} />
         </View>
-        <ErrorState onRefresh={handleRefresh} />
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (!routes || routes.length === 0) {
     return (
-      <SafeAreaView className="flex-1 bg-slate-50">
-        <View className="px-4 py-6 border-b border-slate-200 bg-white">
-          <View className="flex-row items-center">
-            <View className="bg-primary/10 rounded-full p-2 mr-3">
-              <FontAwesome name="book" size={24} className="text-primary" />
+      <View className="flex-1 bg-slate-50">
+        <StatusBar barStyle="light-content" backgroundColor="#2873b4" />
+        <LinearGradient
+          colors={["#2873b4", "#7bd2e6"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="pt-12 pb-8 px-5"
+        >
+          <SafeAreaView>
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1">
+                <Text className="text-white text-3xl font-bold mb-1">
+                  Rutas Campus
+                </Text>
+                <Text className="text-white/80 text-base">
+                  Sistema de navegación universitaria
+                </Text>
+              </View>
+              <View className="bg-white/20 rounded-2xl p-3">
+                <MaterialIcons name="school" size={32} color="white" />
+              </View>
             </View>
-            <View>
-              <Text className="text-slate-900 text-2xl font-bold">Rutas</Text>
-              <Text className="text-slate-600 text-sm">
-                Sistema de navegación universitaria
-              </Text>
-            </View>
-          </View>
+          </SafeAreaView>
+        </LinearGradient>
+        <View className="flex-1 bg-white rounded-t-3xl -mt-4">
+          <EmptyState onRefresh={handleRefresh} />
         </View>
-        <EmptyState onRefresh={handleRefresh} />
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50">
-      {/* Header */}
-      <View className="px-4 py-6 border-b border-slate-200 bg-white">
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center">
-            <View className="bg-primary/10 rounded-full p-2 mr-3">
-              <FontAwesome name="book" size={24} className="text-primary" />
-            </View>
-            <View>
-              <Text className="text-slate-900 text-2xl font-bold">Rutas</Text>
-              <Text className="text-slate-600 text-sm">
+    <View className="flex-1 bg-slate-50">
+      <StatusBar barStyle="light-content" backgroundColor="#2873b4" />
+
+      {/* Header con gradiente */}
+      <LinearGradient
+        colors={["#2873b4", "#7bd2e6"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="pt-12 pb-8 px-5"
+      >
+        <SafeAreaView>
+          <View className="flex-row items-center justify-between mb-4">
+            <View className="flex-1">
+              <Text className="text-white text-3xl font-bold mb-1">
+                Rutas Campus
+              </Text>
+              <Text className="text-white/80 text-base">
                 Sistema de navegación universitaria
               </Text>
             </View>
+            <View className="bg-white/20 rounded-2xl p-3">
+              <MaterialIcons name="school" size={32} color="white" />
+            </View>
           </View>
-          <Text className="text-primary font-semibold text-sm bg-primary/10 px-3 py-1 rounded-full">
-            {routes.length} {routes.length === 1 ? "ruta" : "rutas"}
-          </Text>
-        </View>
-      </View>
+
+          {/* Stats Card */}
+          <View className="bg-white/10 backdrop-blur rounded-2xl p-4 flex-row items-center justify-between">
+            <View className="flex-row items-center">
+              <View className="bg-[#ffc300] rounded-full p-2 mr-3">
+                <MaterialIcons name="route" size={20} color="white" />
+              </View>
+              <View>
+                <Text className="text-white text-lg font-bold">
+                  {routes.length}
+                </Text>
+                <Text className="text-white/70 text-sm">
+                  {routes.length === 1
+                    ? "Ruta disponible"
+                    : "Rutas disponibles"}
+                </Text>
+              </View>
+            </View>
+            <View className="bg-white/20 rounded-xl px-3 py-1">
+              <Text className="text-white text-xs font-semibold">ACTIVO</Text>
+            </View>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
 
       {/* Content */}
       <ScrollView
-        className="flex-1"
-        contentContainerClassName="px-4 py-6"
+        className="flex-1 -mt-4"
         refreshControl={
           <RefreshControl
             refreshing={isLoading}
             onRefresh={handleRefresh}
-            colors={["#3b82f6"]}
-            tintColor="#3b82f6"
+            colors={["#2873b4"]}
+            tintColor="#2873b4"
+            progressBackgroundColor="#ffffff"
           />
         }
         showsVerticalScrollIndicator={false}
       >
-        {routes.map((route) => (
-          <RouteCard
-            key={route.id}
-            route={route}
-            onPress={() => handleRoutePress(route)}
-          />
-        ))}
-
-        {/* Footer info */}
-        <View className="mt-8 pt-6 border-t border-slate-200">
-          <View className="flex-row items-center justify-center">
-            <FontAwesome
-              name="map-pin"
-              size={16}
-              className="text-slate-400 mr-2"
-            />
-            <Text className="text-slate-500 text-sm text-center">
-              Rutas actualizadas automáticamente
+        <View className="bg-white rounded-t-3xl pt-6 min-h-full">
+          <View className="px-5 mb-4">
+            <Text className="text-slate-900 text-xl font-bold mb-2">
+              Rutas Disponibles
             </Text>
+            <Text className="text-slate-600 text-sm opacity-80">
+              Selecciona una ruta para ver los detalles y comenzar la navegación
+            </Text>
+          </View>
+
+          <View className="px-5">
+            {routes.map((route, index) => (
+              <RouteCard
+                key={route.id}
+                route={route}
+                index={index}
+                onPress={() => handleRoutePress(route)}
+              />
+            ))}
+          </View>
+
+          {/* Footer */}
+          <View className="mt-8 pt-6 px-5 pb-8">
+            <View className="bg-slate-50 rounded-2xl p-6 items-center">
+              <View className="bg-[#ffc300]/10 rounded-full p-3 mb-4">
+                <MaterialIcons name="update" size={24} color="#ffc300" />
+              </View>
+              <Text className="text-slate-700 font-semibold text-center mb-1">
+                Actualizaciones automáticas
+              </Text>
+              <Text className="text-slate-500 text-sm text-center">
+                Las rutas se actualizan en tiempo real para ofrecerte la mejor
+                experiencia de navegación
+              </Text>
+            </View>
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

@@ -86,7 +86,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="routes/index"
+        name="routes"
         options={{
           title: "Rutas",
           tabBarIcon: ({ color, focused }) => (

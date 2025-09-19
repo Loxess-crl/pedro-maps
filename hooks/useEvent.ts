@@ -1,14 +1,17 @@
-import { Route } from "@/interfaces/schedule.interface";
-import { getRoutes } from "@/services/routeService";
+import { Event } from "@/interfaces/event.interface";
+import { getEvents } from "@/services/event.Service";
 import { useCallback, useEffect, useState } from "react";
 
 interface Params {
+  page?: number;
   search?: string;
   perPage?: number;
+  date?: string;
+  severity?: string;
 }
 
-export const useRoutes = (params: Params) => {
-  const [data, setData] = useState<Route[] | null>(null);
+export const useEvents = (params?: Params) => {
+  const [data, setData] = useState<Event[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -17,11 +20,10 @@ export const useRoutes = (params: Params) => {
     setError(null);
 
     try {
-      const result = await getRoutes({
+      const result = await getEvents({
         ...params,
       });
       setData(result.data.data);
-      console.log("Data", result.data.data);
     } catch (err: any) {
       setError(err);
     } finally {

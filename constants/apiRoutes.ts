@@ -3,6 +3,7 @@ export enum ApiRoutes {
   LOGIN_FIREBASE = "/auth/login-firebase",
   USERS = "/user",
   SCHEDULE = "/schedule",
+  EVENT = "/event",
   ROUTE = "/route",
   ROUTE_POINTS = "/route/points",
   BROADCAST_AUTH = "/broadcasting/auth",

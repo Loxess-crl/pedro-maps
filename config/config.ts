@@ -16,3 +16,6 @@ export const BROADCAST_HOST = process.env.EXPO_PUBLIC_BROADCAST_HOST;
 export const BROADCAST_PORT = Number(process.env.EXPO_PUBLIC_BROADCAST_PORT);
 export const BROADCAST_SECURE =
   process.env.EXPO_PUBLIC_BROADCAST_SECURE === "true";
+
+export const DIRECTIONAL_MAPS_API_KEY =
+  process.env.EXPO_PUBLIC_DIRECTIONAL_MAPS_API_KEY || "";

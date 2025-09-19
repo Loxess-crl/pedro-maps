@@ -7,7 +7,7 @@ export function setErrorHandler(callback: () => void) {
   showErrorCallback = callback;
 }
 
-const baseURL = "https://a1a0a3e76eb9.ngrok-free.app/api";
+const baseURL = "https://9421340c541d.ngrok-free.app/api";
 const axiosClient = axios.create({
   baseURL,
   headers: {

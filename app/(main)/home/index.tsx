@@ -92,7 +92,7 @@ const AnimatedBusMarker = ({
       title={`Bus ${bus.id}`}
       description={bus.status || "En ruta"}
       anchor={{ x: 0.5, y: 0.5 }}
-      zIndex={isSelected ? 1000 : 1}
+      zIndex={isSelected ? 40 : 1}
     >
       <Animated.View
         style={{
@@ -151,7 +151,7 @@ const AnimatedBusMarker = ({
           </View>
 
           <View
-            className={`absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full ${
+            className={`absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full z-50 ${
               isSelected ? "bg-white" : "bg-blue-600"
             }`}
           >

@@ -14,6 +14,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { setErrorHandler } from "@/services/axiosClient";
 import { FontAwesome } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
+import { View } from "react-native";
+import { Text } from "./ui/text";
 
 export const ErrorHandler = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,40 +40,55 @@ export const ErrorHandler = () => {
 
   return (
     <AlertDialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-      <AlertDialogContent className="sm:max-w-md">
-        <AlertDialogHeader className="flex flex-col items-center text-center space-y-4">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
+      <AlertDialogContent className="w-full max-w-sm mx-4">
+        <AlertDialogHeader className="items-center space-y-4">
+          <View className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
             <FontAwesome
               name="exclamation-triangle"
-              className="h-6 w-6 text-red-600 dark:text-red-400"
+              size={24}
+              color="#dc2626"
+              className="dark:text-red-400"
             />
-          </div>
-          <AlertDialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Sesión Expirada
+          </View>
+
+          <AlertDialogTitle className="text-center">
+            <Text className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Sesión Expirada
+            </Text>
           </AlertDialogTitle>
         </AlertDialogHeader>
 
-        <AlertDialogDescription className="text-center text-gray-600 dark:text-gray-400 py-4">
-          Tu sesión ha expirado por motivos de seguridad. Por favor, inicia
-          sesión nuevamente para continuar.
+        <AlertDialogDescription className="text-center py-4">
+          <Text className="text-gray-600 dark:text-gray-400">
+            Tu sesión ha expirado por motivos de seguridad. Por favor, inicia
+            sesión nuevamente para continuar.
+          </Text>
         </AlertDialogDescription>
 
-        <AlertDialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-center gap-2">
-          <AlertDialogCancel
-            onPress={handleCancel}
-            className="flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800"
-          >
-            <FontAwesome name="times" className="h-4 w-4" />
-            Cancelar
-          </AlertDialogCancel>
-
+        <AlertDialogFooter className="flex-col space-y-2 w-full">
           <AlertDialogAction
             onPress={handleLogout}
-            className="flex items-center gap-2 bg-red-600 hover:bg-red-700 focus:ring-red-500 dark:bg-red-600 dark:hover:bg-red-700"
+            className="w-full bg-red-600 rounded-md px-4"
           >
-            <FontAwesome name="lock" className="h-4 w-4" />
-            Iniciar Sesión
+            <View className="flex-row items-center justify-center px-4 space-x-2">
+              <FontAwesome name="lock" size={16} color="white" />
+              <Text className="text-white font-medium ml-2">
+                Iniciar Sesión
+              </Text>
+            </View>
           </AlertDialogAction>
+
+          <AlertDialogCancel
+            onPress={handleCancel}
+            className="w-full bg-gray-100 dark:bg-gray-800 rounded-md px-4"
+          >
+            <View className="flex-row items-center justify-center px-4 space-x-2">
+              <FontAwesome name="times" size={16} color="#6b7280" />
+              <Text className="text-gray-700 dark:text-gray-300 font-medium ml-2">
+                Cancelar
+              </Text>
+            </View>
+          </AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
