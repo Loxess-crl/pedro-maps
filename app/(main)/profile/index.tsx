@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Text } from "@/components/ui/text";
+import { useAuth } from "@/hooks/use-auth";
 import { User } from "@/interfaces/user.interface";
 import { cn } from "@/lib/utils";
 import { getMe } from "@/services/userService";
@@ -22,6 +23,7 @@ import {
 } from "react-native";
 
 const ProfilePage = () => {
+  const { logout } = useAuth();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -80,6 +82,7 @@ const ProfilePage = () => {
         style: "destructive",
         onPress: () => {
           // TODO: Implement logout logic
+          logout();
           console.log("Cerrando sesión...");
         },
       },
@@ -100,7 +103,7 @@ const ProfilePage = () => {
   };
 
   const getUserInitials = (user: User) => {
-    return `${user.name.charAt(0)}${user.ln_pat.charAt(0)}`.toUpperCase();
+    return `${user.name?.charAt(0)}${user.ln_pat?.charAt(0)}`.toUpperCase();
   };
 
   const getRoleBadgeColor = (roleName: string) => {

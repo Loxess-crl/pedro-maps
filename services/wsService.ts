@@ -141,6 +141,20 @@ export async function connectToPrivateChannel(
         } catch {}
       }
       onLocation(payload as LocationPayload);
+      return;
+    }
+
+    // Detectar eventos de notificaciones
+    if (data.event === "NewEventReceived") {
+      console.log("📬 Evento de notificación detectado:", data.data);
+      onLocation(data.data); // Pasamos los datos del evento
+      return;
+    }
+
+    // Detectar cualquier otro evento que pueda ser relevante
+    if (data.event && data.data) {
+      console.log("📬 Evento genérico recibido:", data.event, data.data);
+      onLocation(data.data);
     }
   };
 

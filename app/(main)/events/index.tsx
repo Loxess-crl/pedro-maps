@@ -36,9 +36,15 @@ const EventsPage = () => {
       try {
         await connectToPrivateChannel(EVENTS_CHANNEL, (payload: any) => {
           console.log("📬 Evento recibido en EventChannel:", payload);
+          console.log("📬 Tipo de payload:", typeof payload);
+          console.log(
+            "📬 Contenido completo:",
+            JSON.stringify(payload, null, 2)
+          );
 
-          // Cuando llega un evento, activamos el indicador de nuevos eventos
+          // Cuando llega cualquier evento relacionado con notificaciones, activamos el indicador
           if (mounted) {
+            console.log("📬 Activando indicador de nuevos eventos...");
             setHasNewEvents(true);
 
             // Auto-refresh después de un breve delay para mostrar el indicador
@@ -48,6 +54,7 @@ const EventsPage = () => {
 
             refreshTimeoutRef.current = setTimeout(() => {
               if (mounted) {
+                console.log("📬 Ejecutando refresh de eventos...");
                 refresh();
                 setHasNewEvents(false);
               }
@@ -55,12 +62,14 @@ const EventsPage = () => {
           }
         });
 
-        if (mounted) setWsConnected(true);
+        if (mounted) {
+          console.log("✅ WebSocket conectado para eventos");
+          setWsConnected(true);
+        }
       } catch (error) {
-        console.log("Error conectando WebSocket para eventos:", error);
+        console.log("❌ Error conectando WebSocket para eventos:", error);
       }
     };
-
     connectWebSocket();
 
     return () => {
